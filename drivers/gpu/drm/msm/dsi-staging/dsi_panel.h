@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2020, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -95,6 +95,9 @@ struct dsi_dyn_clk_caps {
 	bool dyn_clk_support;
 	u32 *bit_clk_list;
 	u32 bit_clk_list_len;
+	bool skip_phy_timing_update;
+	enum dsi_dyn_clk_feature_type type;
+	bool maintain_const_fps;
 };
 
 struct dsi_pinctrl_info {
@@ -193,6 +196,7 @@ struct dsi_panel {
 	struct dsi_video_engine_cfg video_config;
 	struct dsi_cmd_engine_cfg cmd_config;
 	enum dsi_op_mode panel_mode;
+	bool panel_mode_switch_enabled;
 
 	struct dsi_dfps_capabilities dfps_caps;
 	struct dsi_dyn_clk_caps dyn_clk_caps;
@@ -200,6 +204,7 @@ struct dsi_panel {
 
 	struct dsi_display_mode *cur_mode;
 	u32 num_timing_nodes;
+	u32 num_display_modes;
 
 	struct dsi_regulator_info power_info;
 	struct dsi_backlight_config bl_config;
@@ -328,6 +333,14 @@ int dsi_panel_send_qsync_off_dcs(struct dsi_panel *panel,
 int dsi_panel_send_roi_dcs(struct dsi_panel *panel, int ctrl_idx,
 		struct dsi_rect *roi);
 
+int dsi_panel_pre_mode_switch_to_video(struct dsi_panel *panel);
+
+int dsi_panel_pre_mode_switch_to_cmd(struct dsi_panel *panel);
+
+int dsi_panel_mode_switch_to_cmd(struct dsi_panel *panel);
+
+int dsi_panel_mode_switch_to_vid(struct dsi_panel *panel);
+
 int dsi_panel_switch(struct dsi_panel *panel);
 
 int dsi_panel_post_switch(struct dsi_panel *panel);
@@ -351,5 +364,8 @@ int dsi_panel_set_doze_mode(struct dsi_panel *panel, enum dsi_doze_mode_type mod
 int dsi_panel_set_fod_hbm(struct dsi_panel *panel, bool status);
 
 u32 dsi_panel_get_fod_dim_alpha(struct dsi_panel *panel);
+
+void dsi_panel_calc_dsi_transfer_time(struct dsi_host_common_cfg *config,
+		struct dsi_display_mode *mode, u32 frame_threshold_us);
 
 #endif /* _DSI_PANEL_H_ */
